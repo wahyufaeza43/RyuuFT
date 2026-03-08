@@ -3,26 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pocoyo Duel - Ryuu Online</title>
+    <title>Pocoyo Duel Online</title>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #cceeff; color: #333; text-align: center; margin: 0; padding: 10px; }
-        #game-container { max-width: 500px; margin: 20px auto; background: white; padding: 25px; border-radius: 30px; border: 8px solid #ff4444; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        body { font-family: 'Segoe UI', sans-serif; background: #e3f2fd; color: #333; text-align: center; margin: 0; padding: 10px; }
+        #game-container { max-width: 500px; margin: 20px auto; background: white; padding: 25px; border-radius: 30px; border: 8px solid #00aaff; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .hero-container { display: flex; justify-content: space-around; margin-bottom: 20px; }
-        /* KITA BIKIN POCOYO PAKAI CSS BIAR PASTI MUNCUL */
-        .pocoyo-face { width: 80px; height: 80px; border-radius: 50%; border: 4px solid white; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 40px; }
-        .biru { background: #00aaff; } /* Player 1 */
-        .hijau { background: #4ecca3; } /* Player 2 */
-        
-        .p-box { padding: 10px; border-radius: 20px; width: 42%; border: 4px solid #ddd; background: #f9f9f9; }
-        .active-p1 { border: 6px solid #00aaff !important; background: #e0f7ff !important; }
-        .active-p2 { border: 6px solid #4ecca3 !important; background: #e6fff7 !important; }
-        
-        .question { font-size: 1.2em; margin: 20px 0; background: #fff8e1; padding: 20px; border-radius: 18px; border: 3px solid #ffe082; min-height: 60px; }
-        .option { display: block; width: 100%; padding: 15px; margin: 10px 0; background: #4ecca3; border: none; color: white; border-radius: 15px; cursor: pointer; font-size: 1.1em; font-weight: bold; box-shadow: 0 4px 0 #3da17e; }
-        #notif { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 15px 30px; border-radius: 50px; color: white; font-weight: bold; z-index: 100; display: none; }
+        .p-box { padding: 10px; border-radius: 20px; width: 42%; border: 4px solid #ddd; background: #f9f9f9; transition: 0.3s; }
+        .active-p1 { border: 6px solid #00aaff !important; background: #e0f7ff !important; transform: scale(1.05); }
+        .active-p2 { border: 6px solid #4ecca3 !important; background: #e6fff7 !important; transform: scale(1.05); }
+        .hero-img { width: 90px; height: 90px; border-radius: 50%; border: 4px solid white; object-fit: cover; background: #eee; }
+        .question { font-size: 1.1em; margin: 15px 0; background: #fffde7; padding: 15px; border-radius: 15px; border: 2px solid #fff59d; min-height: 50px; }
+        .option { display: block; width: 100%; padding: 15px; margin: 8px 0; background: #4ecca3; border: none; color: white; border-radius: 12px; cursor: pointer; font-size: 1em; font-weight: bold; box-shadow: 0 4px 0 #3da17e; }
+        .option:active { transform: translateY(2px); box-shadow: 0 0 0; }
+        #notif { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); padding: 12px 25px; border-radius: 30px; color: white; font-weight: bold; z-index: 1000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         .hidden { display: none; }
+        h1 { color: #0077cc; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -31,25 +28,25 @@
 
 <div id="game-container">
     <div id="setup-screen">
-        <h1>🐤 POCOYO DUEL ⚔️</h1>
+        <h1>⚔️ POCOYO DUEL ⚔️</h1>
         <p>PPKN Bab 5: Kebhinekaan Indonesia</p>
-        <button class="option" style="background: #00aaff; box-shadow: 0 4px 0 #0088cc;" onclick="pilihRole(1)">SAYA PLAYER 1 (POCOYO BIRU)</button>
-        <button class="option" style="background: #4ecca3; box-shadow: 0 4px 0 #3da17e;" onclick="pilihRole(2)">SAYA PLAYER 2 (POCOYO HIJAU)</button>
+        <button class="option" style="background: #00aaff; box-shadow: 0 4px 0 #0088cc;" onclick="pilihRole(1)">SAYA PLAYER 1 (BIRU)</button>
+        <button class="option" style="background: #4ecca3; box-shadow: 0 4px 0 #3da17e;" onclick="pilihRole(2)">SAYA PLAYER 2 (HIJAU)</button>
     </div>
 
     <div id="quiz-screen" class="hidden">
         <div class="hero-container">
             <div id="box-p1" class="p-box">
-                <div class="pocoyo-face biru">👦</div>
-                <div>P1: ❤️<span id="l1">5</span> ⭐<span id="s1">0</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSf8r0V-tX-P_8q5Uq19M3iNqX9B5-1f_6nRA&s" class="hero-img">
+                <div style="font-weight:bold; color:#00aaff;">❤️ <span id="l1">5</span> | ⭐ <span id="s1">0</span></div>
             </div>
             <div id="box-p2" class="p-box">
-                <div class="pocoyo-face hijau">👶</div>
-                <div>P2: ❤️<span id="l2">5</span> ⭐<span id="s2">0</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3v-m_6r2-vX7-8W8w1v8X_Yy_Yy_Yy_Yy_Yy_Yy&s" class="hero-img">
+                <div style="font-weight:bold; color:#4ecca3;">❤️ <span id="l2">5</span> | ⭐ <span id="s2">0</span></div>
             </div>
         </div>
-        <div id="turn-box" class="question" style="font-weight: bold; background: #ff4444; color: white;">Menghubungkan...</div>
-        <div class="question" id="q-text">Sabar ya...</div>
+        <div id="turn-box" class="question" style="font-weight: bold; background: #00aaff; color: white; border:none;">Menghubungkan...</div>
+        <div class="question" id="q-text">Memuat Pertanyaan...</div>
         <div id="options-container"></div>
     </div>
 </div>
@@ -65,9 +62,11 @@
 
     let myRole = 0;
     let bankSoal = [
-        {q: "Apa sebutan garis keturunan Ibu?", a: "Matrilineal", o: ["Patrilineal", "Matrilineal", "Parental", "Bilateral"]},
-        {q: "Rumah adat suku Toraja adalah...", a: "Tongkonan", o: ["Gadang", "Joglo", "Tongkonan", "Honai"]},
-        {q: "Suku Batak berasal dari...", a: "Sumatra Utara", o: ["Aceh", "Sumatra Utara", "Jawa", "Papua"]}
+        {q: "Apa sebutan sistem kekerabatan garis keturunan Ibu?", a: "Matrilineal", o: ["Patrilineal", "Matrilineal", "Parental", "Bilateral"]},
+        {q: "Alat musik Sasando berasal dari daerah?", a: "NTT", o: ["NTT", "Papua", "Bali", "Aceh"]},
+        {q: "Suku yang berasal dari Kalimantan adalah?", a: "Dayak", o: ["Batak", "Dayak", "Asmat", "Bugis"]},
+        {q: "Rumah adat suku Toraja adalah?", a: "Tongkonan", o: ["Gadang", "Joglo", "Tongkonan", "Honai"]},
+        {q: "Semboyan negara kita adalah?", a: "Bhinneka Tunggal Ika", o: ["Pancasila", "Bhinneka Tunggal Ika", "UUD 1945", "NKRI"]}
     ];
 
     function showNotif(pesan, warna) {
@@ -89,6 +88,12 @@
         document.getElementById('s1').innerText = data.s1; document.getElementById('s2').innerText = data.s2;
         document.getElementById('l1').innerText = data.l1; document.getElementById('l2').innerText = data.l2;
         
+        if(data.l1 <= 0 || data.l2 <= 0) {
+            document.getElementById('q-text').innerText = data.l1 <= 0 ? "GAME OVER! PLAYER 2 MENANG!" : "GAME OVER! PLAYER 1 MENANG!";
+            document.getElementById('options-container').innerHTML = '<button class="option" onclick="location.reload()">MAIN LAGI</button>';
+            return;
+        }
+
         const isMyTurn = data.turn === myRole;
         const turnBox = document.getElementById('turn-box');
         turnBox.innerText = isMyTurn ? "🔥 GILIRAN KAMU! 🔥" : "⏳ TUNGGU LAWAN... ⏳";
