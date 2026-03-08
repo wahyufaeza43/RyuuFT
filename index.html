@@ -27,19 +27,19 @@
 <div id="game-container">
     <div id="setup-screen">
         <h1>🐤 POCOYO DUEL ⚔️</h1>
-        <p>PPKN Bab 5: Kebhinekaan Indonesia</p>
-        <button class="option" style="background: #00aaff; box-shadow: 0 4px 0 #0088cc;" onclick="pilihRole(1)">SAYA PLAYER 1 (POCOYO)</button>
-        <button class="option" style="background: #4ecca3; box-shadow: 0 4px 0 #3da17e;" onclick="pilihRole(2)">SAYA PLAYER 2 (TEMAN POCOYO)</button>
+        <p>Ayo Duel PPKN Real-Time!</p>
+        <button class="option" style="background: #00aaff; box-shadow: 0 4px 0 #0088cc;" onclick="pilihRole(1)">SAYA PLAYER 1 (BIRU)</button>
+        <button class="option" style="background: #4ecca3; box-shadow: 0 4px 0 #3da17e;" onclick="pilihRole(2)">SAYA PLAYER 2 (HIJAU)</button>
     </div>
 
     <div id="quiz-screen" class="hidden">
         <div class="hero-container">
             <div id="box-p1" class="p-box">
-                <img src="https://picsum.photos/id/237/200/200" id="img-p1" class="hero-img">
+                <img id="img-p1" src="https://api.dicebear.com/7.x/bottts/svg?seed=PocoyoBiru" class="hero-img">
                 <div>P1: ❤️<span id="l1">5</span> ⭐<span id="s1">0</span></div>
             </div>
             <div id="box-p2" class="p-box">
-                <img src="https://picsum.photos/id/1012/200/200" id="img-p2" class="hero-img">
+                <img id="img-p2" src="https://api.dicebear.com/7.x/bottts/svg?seed=PocoyoHijau" class="hero-img">
                 <div>P2: ❤️<span id="l2">5</span> ⭐<span id="s2">0</span></div>
             </div>
         </div>
@@ -50,8 +50,9 @@
 </div>
 
 <script>
+    // Data Firebase kamu dari Screenshot (31)
     const firebaseConfig = {
-        apiKey: "AIzaSyBY3iSYm8317A6Oqsd7RleGgqm_xbacsFM", 
+        apiKey: "AIzaSyBY3iSYm8317A6Oqsd7RleGgqm_xbacsFM",
         databaseURL: "https://ryuu-6bddd-default-rtdb.asia-southeast1.firebasedatabase.app",
         projectId: "ryuu-6bddd"
     };
@@ -60,9 +61,9 @@
 
     let myRole = 0;
     let bankSoal = [
-        {q: "Semboyan Bangsa Indonesia adalah...", a: "Bhinneka Tunggal Ika", o: ["Tut Wuri Handayani", "Bhinneka Tunggal Ika", "Pancasila", "UUD 1945"]},
-        {q: "Sistem keturunan garis Ibu (Minang) disebut?", a: "Matrilineal", o: ["Patrilineal", "Matrilineal", "Parental", "Bilateral"]},
-        {q: "Suku Batak berasal dari provinsi...", a: "Sumatra Utara", o: ["Aceh", "Riau", "Sumatra Utara", "Lampung"]}
+        {q: "Apa sebutan sistem kekerabatan berdasarkan garis keturunan ibu?", a: "Matrilineal", o: ["Patrilineal", "Matrilineal", "Parental", "Bilateral"]},
+        {q: "Rumah adat suku Toraja dinamakan?", a: "Tongkonan", o: ["Gadang", "Joglo", "Tongkonan", "Honai"]},
+        {q: "Suku Batak berasal dari provinsi?", a: "Sumatra Utara", o: ["Aceh", "Riau", "Sumatra Utara", "Lampung"]}
     ];
 
     function showNotif(pesan, warna) {
@@ -75,41 +76,7 @@
         myRole = role;
         document.getElementById('setup-screen').classList.add('hidden');
         document.getElementById('quiz-screen').classList.remove('hidden');
-        // Ganti gambar secara manual ke Pocoyo
-        document.getElementById('img-p1').src = "https://img.okezone.com/content/2021/08/17/273/2456729/pocoyo-karakter-kartun-yang-menginspirasi-anak-anak-di-seluruh-dunia-6R8Y9u9x9U.jpg";
-        document.getElementById('img-p2').src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3v-m_6r2-vX7-8W8w1v8X_Yy_Yy_Yy_Yy_Yy_Yy&s";
         if(role === 1) db.ref('game').set({ turn: 1, s1: 0, s2: 0, l1: 5, l2: 5, qIndex: 0 });
     }
 
-    db.ref('game').on('value', (snapshot) => {
-        const data = snapshot.val();
-        if(!data) return;
-        document.getElementById('s1').innerText = data.s1; document.getElementById('s2').innerText = data.s2;
-        document.getElementById('l1').innerText = data.l1; document.getElementById('l2').innerText = data.l2;
-        const isMyTurn = data.turn === myRole;
-        const turnBox = document.getElementById('turn-box');
-        turnBox.innerText = isMyTurn ? "🔥 GILIRAN KAMU! 🔥" : "⏳ TUNGGU LAWAN... ⏳";
-        turnBox.style.background = data.turn === 1 ? "#00aaff" : "#4ecca3";
-        document.getElementById('box-p1').className = data.turn === 1 ? "p-box active-p1" : "p-box";
-        document.getElementById('box-p2').className = data.turn === 2 ? "p-box active-p2" : "p-box";
-        const soal = bankSoal[data.qIndex];
-        document.getElementById('q-text').innerText = soal.q;
-        const container = document.getElementById('options-container');
-        container.innerHTML = "";
-        if(isMyTurn) {
-            soal.o.forEach(opt => {
-                let btn = document.createElement('button');
-                btn.className = 'option'; btn.innerText = opt;
-                btn.onclick = () => {
-                    let update = { turn: data.turn === 1 ? 2 : 1, qIndex: (data.qIndex + 1) % bankSoal.length };
-                    if(opt === soal.a) { showNotif("wah kamu benar", "#4ecca3"); update.s1 = myRole === 1 ? data.s1 + 10 : data.s1; update.s2 = myRole === 2 ? data.s2 + 10 : data.s2; }
-                    else { showNotif("waduhh kamu salah ni", "#ff4444"); update.l1 = myRole === 1 ? data.l1 - 1 : data.l1; update.l2 = myRole === 2 ? data.l2 - 1 : data.l2; }
-                    db.ref('game').update(update);
-                };
-                container.appendChild(btn);
-            });
-        }
-    });
-</script>
-</body>
-</html>
+    db.
