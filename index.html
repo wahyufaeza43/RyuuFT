@@ -35,11 +35,11 @@
     <div id="quiz-screen" class="hidden">
         <div class="hero-container">
             <div id="box-p1" class="p-box">
-                <img src="https://i.ibb.co/C3Ym8Pzf/download.jpg" class="hero-img">
+                <img src="https://picsum.photos/id/237/200/200" id="img-p1" class="hero-img">
                 <div>P1: ❤️<span id="l1">5</span> ⭐<span id="s1">0</span></div>
             </div>
             <div id="box-p2" class="p-box">
-                <img src="https://i.ibb.co/Rk3p0G6R/images.jpg" class="hero-img">
+                <img src="https://picsum.photos/id/1012/200/200" id="img-p2" class="hero-img">
                 <div>P2: ❤️<span id="l2">5</span> ⭐<span id="s2">0</span></div>
             </div>
         </div>
@@ -67,9 +67,7 @@
 
     function showNotif(pesan, warna) {
         const n = document.getElementById('notif');
-        n.innerText = pesan;
-        n.style.background = warna;
-        n.style.display = 'block';
+        n.innerText = pesan; n.style.background = warna; n.style.display = 'block';
         setTimeout(() => { n.style.display = 'none'; }, 2000);
     }
 
@@ -77,6 +75,9 @@
         myRole = role;
         document.getElementById('setup-screen').classList.add('hidden');
         document.getElementById('quiz-screen').classList.remove('hidden');
+        // Ganti gambar secara manual ke Pocoyo
+        document.getElementById('img-p1').src = "https://img.okezone.com/content/2021/08/17/273/2456729/pocoyo-karakter-kartun-yang-menginspirasi-anak-anak-di-seluruh-dunia-6R8Y9u9x9U.jpg";
+        document.getElementById('img-p2').src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3v-m_6r2-vX7-8W8w1v8X_Yy_Yy_Yy_Yy_Yy_Yy&s";
         if(role === 1) db.ref('game').set({ turn: 1, s1: 0, s2: 0, l1: 5, l2: 5, qIndex: 0 });
     }
 
@@ -85,33 +86,24 @@
         if(!data) return;
         document.getElementById('s1').innerText = data.s1; document.getElementById('s2').innerText = data.s2;
         document.getElementById('l1').innerText = data.l1; document.getElementById('l2').innerText = data.l2;
-        
         const isMyTurn = data.turn === myRole;
         const turnBox = document.getElementById('turn-box');
         turnBox.innerText = isMyTurn ? "🔥 GILIRAN KAMU! 🔥" : "⏳ TUNGGU LAWAN... ⏳";
         turnBox.style.background = data.turn === 1 ? "#00aaff" : "#4ecca3";
-
         document.getElementById('box-p1').className = data.turn === 1 ? "p-box active-p1" : "p-box";
         document.getElementById('box-p2').className = data.turn === 2 ? "p-box active-p2" : "p-box";
-
         const soal = bankSoal[data.qIndex];
         document.getElementById('q-text').innerText = soal.q;
         const container = document.getElementById('options-container');
         container.innerHTML = "";
-        
         if(isMyTurn) {
             soal.o.forEach(opt => {
                 let btn = document.createElement('button');
                 btn.className = 'option'; btn.innerText = opt;
                 btn.onclick = () => {
                     let update = { turn: data.turn === 1 ? 2 : 1, qIndex: (data.qIndex + 1) % bankSoal.length };
-                    if(opt === soal.a) { 
-                        showNotif("wah kamu benar", "#4ecca3");
-                        if(myRole === 1) update.s1 = data.s1 + 10; else update.s2 = data.s2 + 10; 
-                    } else { 
-                        showNotif("waduhh kamu salah ni", "#ff4444");
-                        if(myRole === 1) update.l1 = data.l1 - 1; else update.l2 = data.l2 - 1; 
-                    }
+                    if(opt === soal.a) { showNotif("wah kamu benar", "#4ecca3"); update.s1 = myRole === 1 ? data.s1 + 10 : data.s1; update.s2 = myRole === 2 ? data.s2 + 10 : data.s2; }
+                    else { showNotif("waduhh kamu salah ni", "#ff4444"); update.l1 = myRole === 1 ? data.l1 - 1 : data.l1; update.l2 = myRole === 2 ? data.l2 - 1 : data.l2; }
                     db.ref('game').update(update);
                 };
                 container.appendChild(btn);
