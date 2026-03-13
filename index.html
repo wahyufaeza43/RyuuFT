@@ -1,144 +1,143 @@
-import pygame
-import sys
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civic Quest: Harmoni PPKN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #f0f4f8; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .timer-bar { transition: width 0.1s linear; }
+        .btn-option:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
 
-# Inisialisasi Pygame
-pygame.init()
-
-# Konfigurasi Layar & Frame Rate
-WIDTH, HEIGHT = 900, 650
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Civic Quest: Harmoni v2.0")
-clock = pygame.time.Clock()
-
-# Palet Warna Modern
-BG_COLOR = (236, 240, 241)    # Putih Abu-abu (Clean)
-PRIMARY = (52, 152, 219)     # Biru Cerah
-SUCCESS = (46, 204, 113)     # Hijau
-DANGER = (231, 76, 60)       # Merah
-TEXT_DARK = (44, 62, 80)     # Hitam Kebiruan
-GOLD = (241, 196, 15)
-
-# Font
-font_soal = pygame.font.SysFont("Verdana", 26, bold=True)
-font_opsi = pygame.font.SysFont("Tahoma", 20, bold=True)
-font_ui = pygame.font.SysFont("Courier", 24, bold=True)
-
-# Data Soal (PPKN Bab 5 Kelas 9)
-questions = [
-    {"q": "Upaya menciptakan kehidupan selaras disebut...", "options": ["A. Konflik", "B. Harmoni", "C. Integrasi"], "ans": "B"},
-    {"q": "Keberagaman ekonomi harus disikapi dengan...", "options": ["A. Kompetisi", "B. Kerja sama", "C. Menghina"], "ans": "B"},
-    {"q": "Gender dalam masyarakat merujuk pada...", "options": ["A. Jenis Kelamin", "B. Peran Sosial", "C. Usia"], "ans": "B"},
-    {"q": "Masalah akibat keberagaman yang tidak dikelola...", "options": ["A. Persatuan", "B. Konflik", "C. Kemakmuran"], "ans": "B"},
-    {"q": "Contoh harmoni keberagaman gender adalah...", "options": ["A. Kesamaan hak sekolah", "B. Dominasi pria", "C. Diskriminasi"], "ans": "A"},
-    {"q": "Sistem keturunan dari garis ibu disebut...", "options": ["A. Patrilineal", "B. Matrilineal", "C. Bilateral"], "ans": "B"},
-    {"q": "Strategi mengatasi konflik SARA adalah...", "options": ["A. Diskriminasi", "B. Preventif", "C. Menghina"], "ans": "B"},
-    {"q": "Suku Minangkabau menganut sistem...", "options": ["A. Patrilineal", "B. Matrilineal", "C. Parental"], "ans": "B"},
-    {"q": "Menganggap budayanya paling unggul disebut...", "options": ["A. Etnosentrisme", "B. Toleransi", "C. Pluralisme"], "ans": "A"},
-    {"q": "Dasar hukum kebebasan beragama adalah Pasal...", "options": ["A. Pasal 27", "B. Pasal 29", "C. Pasal 30"], "ans": "B"},
-]
-
-class Game:
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.current_q = 0
-        self.score = 0
-        self.lives = 3
-        self.game_over = False
-        self.timer = 1500  # 15 detik (60 FPS * 25)
-        self.max_timer = 1500
-
-    def draw_text(self, text, font, color, x, y, center=False):
-        img = font.render(text, True, color)
-        rect = img.get_rect()
-        if center: rect.center = (x, y)
-        else: rect.topleft = (x, y)
-        screen.blit(img, rect)
-
-    def update(self):
-        if not self.game_over:
-            self.timer -= 2  # Kecepatan waktu berkurang
-            if self.timer <= 0:
-                self.lives -= 1
-                self.next_question()
-
-    def next_question(self):
-        if self.current_q < len(questions) - 1 and self.lives > 0:
-            self.current_q += 1
-            self.timer = self.max_timer
-        else:
-            self.game_over = True
-
-    def draw(self):
-        screen.fill(BG_COLOR)
+    <div id="game-card" class="glass max-w-2xl w-full rounded-3xl shadow-2xl overflow-hidden border-4 border-white">
         
-        # Header UI
-        pygame.draw.rect(screen, PRIMARY, (0, 0, WIDTH, 100))
-        self.draw_text(f"SCORE: {self.score}", font_ui, WHITE := (255,255,255), 40, 35)
-        self.draw_text(f"LIVES: {'❤️' * self.lives}", font_ui, DANGER, WIDTH - 250, 35)
+        <div class="bg-blue-600 p-6 text-white flex justify-between items-center">
+            <div>
+                <p class="text-xs opacity-80 font-bold uppercase tracking-widest">Skor</p>
+                <h2 id="score" class="text-3xl font-black">0</h2>
+            </div>
+            <div class="text-right">
+                <p class="text-xs opacity-80 font-bold uppercase tracking-widest">Nyawa</p>
+                <h2 id="lives" class="text-3xl tracking-tighter">❤️❤️❤️</h2>
+            </div>
+        </div>
 
-        if not self.game_over:
-            # Progress Bar Waktu
-            timer_width = (self.timer / self.max_timer) * WIDTH
-            pygame.draw.rect(screen, GOLD, (0, 100, timer_width, 10))
+        <div class="w-full h-2 bg-gray-200">
+            <div id="timer" class="timer-bar h-full bg-yellow-400 w-full"></div>
+        </div>
 
-            # Kotak Soal
-            q_data = questions[self.current_q]
-            pygame.draw.rect(screen, (255,255,255), (50, 140, WIDTH-100, 140), border_radius=15)
-            self.draw_text(q_data["q"], font_soal, TEXT_DARK, WIDTH//2, 210, center=True)
-
-            # Tombol Jawaban
-            for i, opsi in enumerate(q_data["options"]):
-                y_pos = 320 + (i * 90)
-                mouse_pos = pygame.mouse.get_pos()
-                btn_rect = pygame.Rect(150, y_pos, 600, 70)
+        <div class="p-8">
+            <div id="question-box">
+                <span class="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-bold mb-4">SOAL <span id="q-number">1</span>/10</span>
+                <h1 id="question-text" class="text-2xl font-bold text-gray-800 leading-tight mb-8">Memuat pertanyaan...</h1>
                 
-                # Efek Hover
-                color = SUCCESS if btn_rect.collidepoint(mouse_pos) else PRIMARY
-                pygame.draw.rect(screen, color, btn_rect, border_radius=12)
-                self.draw_text(opsi, font_opsi, WHITE, WIDTH//2, y_pos + 35, center=True)
-        else:
-            # Layar Akhir
-            overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-            overlay.fill((0, 0, 0, 180))
-            screen.blit(overlay, (0,0))
+                <div id="options-container" class="space-y-4">
+                    </div>
+            </div>
+
+            <div id="result-screen" class="hidden text-center py-10">
+                <h2 id="result-title" class="text-4xl font-black mb-2">MISI SELESAI!</h2>
+                <p id="result-msg" class="text-gray-600 mb-8">Kamu luar biasa dalam memahami keberagaman.</p>
+                <div class="bg-blue-50 rounded-2xl p-6 mb-8">
+                    <p class="text-sm text-gray-500 uppercase font-bold">Skor Akhir</p>
+                    <h3 id="final-score" class="text-6xl font-black text-blue-600">0</h3>
+                </div>
+                <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-2xl shadow-lg transition-all">MAIN LAGI</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {q: "Upaya menciptakan kehidupan selaras dan seimbang disebut...", o: ["A. Konflik", "B. Harmoni", "C. Integrasi"], a: 1},
+            {q: "Keberagaman ekonomi harus disikapi dengan cara...", o: ["A. Kompetisi", "B. Kerja sama", "C. Menghina"], a: 1},
+            {q: "Gender dalam masyarakat merujuk pada...", o: ["A. Jenis Kelamin", "B. Peran Sosial", "C. Usia"], a: 1},
+            {q: "Masalah akibat keberagaman yang tidak dikelola...", o: ["A. Persatuan", "B. Konflik", "C. Kemakmuran"], a: 1},
+            {q: "Contoh harmoni keberagaman gender adalah...", o: ["A. Kesamaan hak sekolah", "B. Dominasi pria", "C. Diskriminasi"], a: 0},
+            {q: "Sistem keturunan dari garis ibu disebut...", o: ["A. Patrilineal", "B. Matrilineal", "C. Bilateral"], a: 1},
+            {q: "Strategi mengatasi konflik SARA adalah...", o: ["A. Diskriminasi", "B. Preventif", "C. Menghina"], a: 1},
+            {q: "Suku Minangkabau menganut sistem...", o: ["A. Patrilineal", "B. Matrilineal", "C. Parental"], a: 1},
+            {q: "Menganggap budayanya paling unggul disebut...", o: ["A. Etnosentrisme", "B. Toleransi", "C. Pluralisme"], a: 0},
+            {q: "Dasar hukum kebebasan beragama adalah Pasal...", o: ["A. Pasal 27", "B. Pasal 29", "C. Pasal 30"], a: 1}
+        ];
+
+        let currentQ = 0;
+        let score = 0;
+        let lives = 3;
+        let timeLeft = 100;
+        let timerInterval;
+
+        function startGame() {
+            showQuestion();
+            startTimer();
+        }
+
+        function startTimer() {
+            timeLeft = 100;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft -= 0.5;
+                document.getElementById('timer').style.width = timeLeft + "%";
+                if (timeLeft <= 0) {
+                    handleAnswer(-1); // Waktu habis dianggap salah
+                }
+            }, 50);
+        }
+
+        function showQuestion() {
+            const q = questions[currentQ];
+            document.getElementById('q-number').innerText = currentQ + 1;
+            document.getElementById('question-text').innerText = q.q;
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
             
-            res_color = SUCCESS if self.lives > 0 else DANGER
-            pygame.draw.rect(screen, BG_COLOR, (250, 180, 400, 300), border_radius=20)
-            self.draw_text("HASIL AKHIR", font_soal, TEXT_DARK, WIDTH//2, 230, center=True)
-            self.draw_text(f"SKOR: {self.score}", font_ui, GOLD, WIDTH//2, 300, center=True)
-            self.draw_text("Tekan 'R' untuk Reset", font_opsi, TEXT_DARK, WIDTH//2, 400, center=True)
+            q.o.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "btn-option w-full text-left p-5 rounded-2xl border-2 border-gray-100 bg-white hover:border-blue-500 hover:bg-blue-50 transition-all font-semibold text-gray-700 flex justify-between items-center group";
+                btn.innerHTML = `<span>${opt}</span> <span class="opacity-0 group-hover:opacity-100 text-blue-500">➜</span>`;
+                btn.onclick = () => handleAnswer(index);
+                container.appendChild(btn);
+            });
+        }
 
-# Main Loop
-game = Game()
-running = True
+        function handleAnswer(index) {
+            if (index === questions[currentQ].a) {
+                score += 10;
+                document.getElementById('score').innerText = score;
+            } else {
+                lives--;
+                document.getElementById('lives').innerText = "❤️".repeat(lives) || "💀";
+            }
 
-while running:
-    game.update()
-    game.draw()
-    
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        
-        if event.type == pygame.MOUSEBUTTONDOWN and not game.game_over:
-            mx, my = pygame.mouse.get_pos()
-            for i in range(3):
-                if 150 <= mx <= 750 and 320 + (i * 90) <= my <= 320 + (i * 90) + 70:
-                    # Logika Jawaban
-                    ans = chr(65 + i)
-                    if ans == questions[game.current_q]["ans"]:
-                        game.score += 10
-                    else:
-                        game.lives -= 1
-                    game.next_question()
-        
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_r and game.game_over:
-                game.reset()
+            if (currentQ < questions.length - 1 && lives > 0) {
+                currentQ++;
+                showQuestion();
+                startTimer();
+            } else {
+                endGame();
+            }
+        }
 
-    pygame.display.flip()
-    clock.tick(60)
+        function endGame() {
+            clearInterval(timerInterval);
+            document.getElementById('question-box').classList.add('hidden');
+            document.getElementById('timer').parentElement.classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+            if (lives <= 0) {
+                document.getElementById('result-title').innerText = "GAME OVER";
+                document.getElementById('result-title').className = "text-4xl font-black mb-2 text-red-500";
+                document.getElementById('result-msg').innerText = "Jangan menyerah, ayo belajar lagi!";
+            }
+        }
 
-pygame.quit()
+        startGame();
+    </script>
+</body>
+</html>
